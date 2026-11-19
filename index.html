@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -70,7 +70,7 @@
         status: "completed",
         language: "ru",
         prompt_text: "Проверка безопасности отображения: <img src=x onerror=alert('xss')>",
-        result_markdown: "## Тестовый отчёт\n\nОбычный текст и жирный текст.\n\n<script>alert('xss')</script>\n\n<img src=x onerror=\"alert('xss')\">\n\n[Ссылка](javascript:alert('xss'))\n\nЕсли при открытии этого отчёта появилось всплывающее окно — страница небезопасна."
+        result_markdown: "## Тестовый отчёт\n\nОбычный текст и жирный текст.\n\n<script>alert('xss')<\/script>\n\n<img src=x onerror=\"alert('xss')\">\n\n[Ссылка](javascript:alert('xss'))\n\nЕсли при открытии этого отчёта появилось всплывающее окно — страница небезопасна."
       }
     ];
 
