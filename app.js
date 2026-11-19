@@ -1,4 +1,4 @@
-const STATUS_MAP = {
+ const STATUS_MAP = {
   completed: { label: "Готов", className: "badge-completed" },
   processing: { label: "В работе", className: "badge-processing" },
   failed: { label: "Ошибка", className: "badge-failed" }
@@ -137,7 +137,7 @@ function renderCards() {
     : allReports.filter(item => item.status === currentFilter);
 
   listEl.innerHTML = "";
- if (filtered.length === 0) {
+[19.11.2026 21:41] Oskolkov Alex: if (filtered.length === 0) {
     listEl.innerHTML = '<div class="empty-state">Отчётов с выбранным статусом нет</div>';
     return;
   }
@@ -226,4 +226,3 @@ document.addEventListener("keydown", (e) => {
 });
 
 init();
- 
