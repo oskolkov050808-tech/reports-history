@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>История отчётов</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://jsdelivr.net"></script>
+  <script src="https://jsdelivr.net"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>История отчётов</h1>
+      <div class="filters" id="filters">
+        <button class="filter-btn active" data-status="all">Все</button>
+        <button class="filter-btn" data-status="completed">Готов</button>
+        <button class="filter-btn" data-status="processing">В работе</button>
+        <button class="filter-btn" data-status="failed">Ошибка</button>
+      </div>
+    </header>
+
+    <main class="reports-list" id="reportsList"></main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="card-meta" id="modalMeta"></div>
+        <button class="close-btn" id="closeModalBtn" aria-label="Закрыть">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
