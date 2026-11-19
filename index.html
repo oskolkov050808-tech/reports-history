@@ -1,12 +1,10 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>История отчётов</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://jsdelivr.net"></script>
-  <script src="https://jsdelivr.net"></script>
 </head>
 <body>
   <div class="container">
@@ -19,7 +17,6 @@
         <button class="filter-btn" data-status="failed">Ошибка</button>
       </div>
     </header>
-
     <main class="reports-list" id="reportsList"></main>
   </div>
 
@@ -33,6 +30,134 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    const DATA = [
+      {
+        id: 105,
+        created_at: "2026-11-15T18:42:10+05:00",
+        status: "processing",
+        language: "ru",
+        prompt_text: "Строительная компания в Самарканде, 25 сотрудников. Проекты регулярно срываются по срокам из-за поставок материалов. Как наладить планирование?",
+        result_markdown: null
+      },
+      {
+        id: 104,
+        created_at: "2026-11-15T11:05:37+05:00",
+        status: "completed",
+        language: "ru",
+        prompt_text: "Мы продаём детскую одежду на Uzum Market, около 300 заказов в месяц, возвратов 18%. Как снизить возвраты и вырасти до 500 заказов?",
+        result_markdown: "## 1. Исходные данные и расчёт базы\n\n- Заказов в месяц: 300\n- Средний чек: 180 000 сум\n- Доля возвратов: 18%\n\nВыручка без учёта возвратов: 300 × 180 000 = 54 000 000 сум/мес.\nПотери на возвратах: 54 000 000 × 0,18 ≈ 9 720 000 сум/мес.\n\n## 2. Анализ проблемы\n\nОсновная причина возвратов — несоответствие размера. Таблица размеров в карточках не учитывает рост ребёнка.\n\n## 3. План действий\n\n1. Добавить в карточки таблицу «рост → размер»\n2. Снять фото на детях разного роста\n3. Запустить опрос после возврата:\n - причина возврата\n - какой размер подошёл бы\n\n| Мера | Срок | Ожидаемый эффект |\n|---|---|---|\n| Таблица размеров | 2 недели | −5% возвратов |\n| Новые фото | 1 месяц | −3% возвратов |\n| Опрос | 1 неделя | данные для улучшений |\n\n## 4. Допущения и что проверить\n\n- Комиссия маркетплейса 15–20% *(допущение, уточнить в кабинете продавца)*"
+      },
+      {
+        id: 103,
+        created_at: "2026-11-14T09:30:00+05:00",
+        status: "failed",
+        language: "en",
+        prompt_text: "Small logistics company in Tashkent with 12 trucks. Fuel costs grew 30% this year. How can we cut costs without losing clients?",
+        result_markdown: null
+      },
+      {
+        id: 102,
+        created_at: "2026-11-12T20:15:48+05:00",
+        status: "completed",
+        language: "ru",
+        prompt_text: "Семейное кафе в Ташкенте, район Чиланзар, 40 мест, средний чек 85 000 сум, загрузка в будни 30%. Хотим +30% выручки за 6 месяцев.",
+        result_markdown: "## 1. Исходные данные и расчёт базы\n\nВыручка в будни (оценка): 40 мест × 30% × 3 оборота × 85 000 = 3 060 000 сум/день *(допущение: 3 оборота стола в день)*.\n\n## 2. Цели и путь к ним\n\n- Загрузка в будни: 30% → 45% (+18% к выручке)\n- Средний чек: 85 000 → 95 000 сум (+12%)\n- Итого: ≈ +30%\n\n## 3. План действий\n\n### Месяц 1\n- Бизнес-ланч с 12:00 до 15:00\n- Подключение к Yandex Eats\n\n### Месяцы 2–3\n- Программа лояльности в Telegram-боте\n\n> Главный риск — комиссия агрегаторов съедает маржу доставки.\n\nПодробнее про бизнес-ланчи: ланч-меню из 3–4 позиций."
+ },
+      {
+        id: 101,
+        created_at: "2026-11-10T14:02:11+05:00",
+        status: "completed",
+        language: "ru",
+        prompt_text: "Проверка безопасности отображения: <img src=x onerror=alert('xss')>",
+        result_markdown: "## Тестовый отчёт\n\nОбычный текст и жирный текст.\n\n<script>alert('xss')</script>\n\n<img src=x onerror=\"alert('xss')\">\n\n[Ссылка](javascript:alert('xss'))\n\nЕсли при открытии этого отчёта появилось всплывающее окно — страница небезопасна."
+      }
+    ];
+
+    const ST = { completed: ["Готов", "badge-completed"], processing: ["В работе", "badge-processing"], failed: ["Ошибка", "badge-failed"] };
+    let filter = "all";
+
+    const fmt = d => new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(d));
+    const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; };
+
+    function renderMd(box, text) {
+      const B = String.fromCharCode(42, 42), C = String.fromCharCode(96);
+      let tbl = null;
+      text.split(/\r?\n/).forEach(raw => {
+        const line = raw.trim();
+        if (!line) { tbl = null; return; }
+        if (line.startsWith("|") && line.endsWith("|")) {
+          const cells = line.slice(1, -1).split("|").map(s => s.trim());
+          if (cells.every(s => /^:?-+:?$/.test(s))) return;
+          if (!tbl) tbl = box.appendChild(el("div", "table-wrapper")).appendChild(el("table"));
+          const tr = tbl.appendChild(el("tr"));
+          cells.forEach(s => tr.appendChild(el(tbl.rows.length === 1 ? "th" : "td", "", s.split(B).join(""))));
+          return;
+        }
+        tbl = null;
+        const tag = line.startsWith("### ") ? "h3" : line.startsWith("## ") ? "h2" : line.startsWith("> ") ? "blockquote" : (line.startsWith("- ") || /^\d+\.\s/.test(line)) ? "li" : "p";
+        const node = box.appendChild(el(tag));
+        const clean = line.replace(/^(### |## |> |- |\d+\.\s)/, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+        clean.split(B).forEach((chunk, i) => {
+          if (i % 2 === 1) { node.appendChild(el("strong", "", chunk)); return; }
+          chunk.split(C).forEach((sub, j) => node.appendChild(j % 2 === 1 ? el("code", "", sub) : document.createTextNode(sub)));
+        });
+      });
+    }
+
+    function render() {
+      const list = document.getElementById("reportsList");
+      list.textContent = "";
+      const arr = filter === "all" ? DATA : DATA.filter(i => i.status === filter);
+      if (!arr.length) { list.appendChild(el("div", "empty-state", "Отчётов нет")); return; }
+      arr.forEach(item => {
+        const [lbl, cls] = ST[item.status] || [item.status, ""];
+        const card = list.appendChild(el("article", "card"));
+        const head = card.appendChild(el("div", "card-header"));
+        const meta = head.appendChild(el("div", "card-meta"));
+        meta.append(el("span", "report-id", "#" + item.id), el("span", "", fmt(item.created_at)), el("span", "lang-tag", item.language));
+        head.appendChild(el("span", "badge " + cls, lbl));
+        card.appendChild(el("p", "card-prompt", item.prompt_text));
+        card.onclick = () => openModal(item);
+      });
+    }
+
+    document.getElementById("filters").onclick = e => {
+      const btn = e.target.closest(".filter-btn");
+      if (!btn) return;
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      filter = btn.dataset.status;
+      render();
+    };
+
+    const modal = document.getElementById("modalBackdrop");
+    function openModal(item) {
+      const [lbl, cls] = ST[item.status] || [item.status, ""];
+      const meta = document.getElementById("modalMeta");
+ meta.textContent = "";
+      meta.append(el("span", "report-id", "Отчёт #" + item.id), el("span", "", fmt(item.created_at)), el("span", "badge " + cls, lbl));
+      const body = document.getElementById("modalBody");
+      body.textContent = "";
+      const pBox = body.appendChild(el("div", "prompt-box"));
+      pBox.append(el("div", "prompt-box-label", "Запрос"), el("div", "", item.prompt_text));
+      const content = body.appendChild(el("div"));
+      if (item.status === "completed" && item.result_markdown) {
+        content.className = "markdown-body";
+        renderMd(content, item.result_markdown);
+      } else {
+        content.className = "status-placeholder";
+        content.textContent = item.status === "processing" ? "Отчёт ещё формируется." : "Ошибка генерации отчёта.";
+      }
+      modal.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+
+    const close = () => { modal.classList.remove("open"); document.body.style.overflow = ""; };
+    document.getElementById("closeModalBtn").onclick = close;
+    modal.onclick = e => { if (e.target === modal) close(); };
+    document.onkeydown = e => { if (e.key === "Escape") close(); };
+    render();
+  </script>
 </body>
 </html>
